@@ -1,0 +1,47 @@
+# my global config
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    metrics_path: /actuator/prometheus
+    scheme: http
+    #consul_sd_configs:
+    #consul 地址
+    #  - server: '127.0.0.1:8761'
+    #    scheme: http
+    #    services: [provider-user]
+    static_configs:
+    - targets: ['192.168.1.68:8888','192.168.1.68:7101','192.168.1.68:7001','192.168.1.68:7201','192.168.1.68:7301','192.168.1.68:7401',
+    '192.168.1.68:9101','192.168.1.68:9201','192.168.1.68:9301']
+  - job_name: linux
+    static_configs:
+      - targets: ['192.168.19.130:9100']
+        labels:
+          instance: localhost
+    
+    
+    
+    
+    
+    

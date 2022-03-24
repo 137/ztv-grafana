@@ -1,0 +1,14 @@
+{
+  "type": "datasource",
+  "name": "-- Mixed --",
+  "id": "mixed",
+
+  "builtIn": true,
+  "mixed": true,
+  "metrics": true,
+  "hiddenQueries": true,
+
+  "queryOptions": {
+    "minInterval": true
+  }
+}

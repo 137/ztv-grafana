@@ -1,0 +1,59 @@
+
+1、部署监控系统注意：prometheus集成在spring cloud中只会提供一些接口，没有可视化页面，所以想要更方便的查看各服务的监控信息必须下载安装
+prometheus【https://prometheus.io/download/】以及Grafana【http://docs.grafana.org/installation/windows/】软件，
+具体安装参考文档【https://www.jianshu.com/p/9ec4f5f63932】
+项目搭建参考文档【https://www.cnblogs.com/dalaoyang/p/10508817.html】
+其中：粘贴一下我本机windows安装的prometheus.yml的配置文件的配置
+    scrape_configs:
+     # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+     - job_name: 'prometheus'
+       scrape_interval: 5s
+       scrape_timeout: 5s
+       metrics_path: /actuator/prometheus
+       scheme: http
+       # metrics_path defaults to '/metrics'
+       # scheme defaults to 'http'.
+
+       static_configs:
+       - targets: ['localhost:8888']
+
+2、example：监控测试springcloud 项目端口是8888 则prometheus软件中应该配置http://localhost:8888/actuator/prometheus（修改安装目录下的bin下的prometheus.yml文件）
+然后访问prometheus http://localhost:9090/targets即可看到我们的监控项目了，然后通过可视化软件Grafana 的页面http://localhost:3000
+通过更直观好看的方式监控各系统运行状态
+
+
+
+4、grafana有直接的汉化版和可维护的汉化版，实际上可维护的就是前端的脚手架可直接修改翻译文件，然后让grafana的前端文件代理到本地运行的脚手架即可
+
+    a、Grafana可维护汉化版参考文档【前端】：https://wanghualong.cn/archives/44/?spm=a2c4e.10696291.0.0.6f4a19a4jOYrHz
+
+    b、在安装之前需要先下载准备好git以及nodejs【https://blog.csdn.net/u011342720/article/details/81267908】或者淘宝的cnpm【npm install -g cnpm --registry=https://registry.npm.taobao.org  在哪个目录下执行就会安装到那个目录下面】
+
+    c、在windows下安装npm install的时候可能会报错：（MSBUILD : error MSB3428: 未能加载 Visual C++ 组件“VCBuild.exe”。要解决此问题。。。），需要管理员运行powershell
+    执行npm install --global --production windows-build-tools语句
+    如果windows的npm start运行不了，可以安装yarn用yarn部署（npm install -g yarn ；  yarn install ； yarn start  ）
+
+    d.在安装成功之后访问localhost:3333即可，在此页面配置prometheus数据源-》配置dashboard-》配置各种参数
+    -》如果不想自己配置仪表盘dashboard可以到https://grafana.com/grafana/dashboards网址查找大神配置好的模板---其中springboot json文件已下载到本工程中spring-boot-statistics_rev2.json
+    注意：在自己电脑上运行的是前端文件，虽然3333前端端口能访问其实也是通过3000官方yarn来提供服务的，所以必须都运行
+         如果修改了配置，最好重启一下电脑，目前还不知道怎么重启，直接启动可能还是老的配置
+         在grafana前端版本是6.4以上版本如果运行完之后端口访问不了，则可以试试用yarn start:hot执行
+
+5、邮件发送和报警功能设置需要先配置smtp邮件服务器
+参考文档：http://www.imooc.com/article/73338    https://blog.csdn.net/u012013791/article/details/79522920
+其中主要是修改grafana的default.ini的配置，如下【在此采用的qq邮箱作为服务器】：
+[smtp]
+enabled = true
+host = smtp.qq.com:465
+user = 251305396@qq.com
+password = tvpabplzhvfsbhbj   【这个是qq邮箱中的smtp的授权码】
+cert_file =
+key_file =
+skip_verify = false
+from_address = 251305396@qq.com
+from_name = zjiptv_grafana
+ehlo_identity =
+然后就是仪表板的界面配置了：
+        a.到http://localhost:3333/alerting/notifications页面配置通知频道然后配置邮件地址即可，就会产生一条通知频道的配置
+        b.到dashboard仪表板中条件规则然后配置alert发送目的地以及信息即可，当数据满足此条件就会发送邮件到以上配置的通知频道中的地址了，
+          同时在alert rules也会产生一条报警

@@ -1,0 +1,104 @@
+<div class="gf-form-group">
+  <div class="grafana-info-box">
+    <h4>Stackdriver身份验证</h4>
+    <p>T这里有两种方法来验证Stackdriver插件——通过上传服务帐户密钥文件，或者通过
+      从谷歌元数据服务器自动检索凭据。后一种选择只可用
+      在GCE虚拟机上运行Grafana时.</p>
+
+    <h5>上传服务帐户密钥文件</h5>
+    <p>
+      首先，您需要为其创建一个谷歌云平台(GCP)服务帐户
+      要显示数据的项目。Grafana数据源与一个GCP项目集成。如果你想
+      可视化来自多个GCP项目的数据，然后您需要为每个GCP项目创建一个数据.
+    </p>
+    <p>
+       <strong>监控可视化</strong> 角色提供Grafana需要的所有权限。下面的API
+      需要在GCP上启用该数据源才能工作: <a class="external-link" target="_blank" href="https://console.cloud.google.com/apis/library/monitoring.googleapis.com">Monitoring
+        API</a>
+    </p>
+
+    <h5>GCE默认服务帐户</h5>
+    <p>
+      如果Grafana运行在一个谷歌计算引擎(GCE)虚拟机上，那么Grafana就可以这样做
+      从元数据服务器自动检索默认的项目id和身份验证令牌。为了这个
+      工作时，您需要确保您有一个服务帐户，该帐户被设置为虚拟机的默认帐户
+      并向服务帐户授予对Stackdriver监视API的读访问权.
+    </p>
+
+    <p>可以找到关于如何创建服务帐户的详细说明 <a class="external-link" target="_blank"
+        href="http://docs.grafana.org/datasources/stackdriver/">在此文档中.</a>
+    </p>
+  </div>
+</div>
+
+<div class="gf-form-group">
+  <div class="gf-form">
+    <h3>认证</h3>
+    <info-popover mode="header">上传您的服务帐户密钥文件或粘贴在文件的内容。该文件
+      内容将被加密并保存在Grafana数据库中.</info-popover>
+  </div>
+
+  <div class="gf-form-inline">
+    <div class="gf-form max-width-30">
+      <span class="gf-form-label width-10">认证类型</span>
+      <div class="gf-form-select-wrapper max-width-24">
+        <select class="gf-form-input" ng-model="ctrl.current.jsonData.authenticationType" ng-options="f.key as f.value for f in ctrl.authenticationTypes"></select>
+      </div>
+    </div>
+  </div>
+
+  <div ng-if="ctrl.current.jsonData.authenticationType === ctrl.defaultAuthenticationType && !ctrl.current.jsonData.clientEmail && !ctrl.inputDataValid">
+    <div class="gf-form-group" ng-if="!ctrl.inputDataValid">
+      <div class="gf-form">
+        <form>
+          <dash-upload on-upload="ctrl.onUpload(dash)" btn-text="Upload Service Account key file"></dash-upload>
+        </form>
+      </div>
+    </div>
+    <div class="gf-form-group">
+      <h5 class="section-heading" ng-if="!ctrl.inputDataValid">或粘贴服务帐户密钥JSON</h5>
+      <div class="gf-form" ng-if="!ctrl.inputDataValid">
+        <textarea rows="10" data-share-panel-url="" class="gf-form-input" ng-model="ctrl.jsonText" ng-paste="ctrl.onPasteJwt($event)"></textarea>
+      </div>
+      <div ng-repeat="valError in ctrl.validationErrors" class="text-error p-l-1">
+        <i class="fa fa-warning"></i>
+        {{valError}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="gf-form-group" ng-if="ctrl.current.jsonData.authenticationType === ctrl.defaultAuthenticationType && (ctrl.inputDataValid || ctrl.current.jsonData.clientEmail)">
+  <h6>上传key信息</h6>
+
+  <div class="gf-form">
+    <span class="gf-form-label width-10">工程</span>
+    <input class="gf-form-input width-40" disabled type="text" ng-model="ctrl.current.jsonData.defaultProject" />
+  </div>
+  <div class="gf-form">
+    <span class="gf-form-label width-10">客户端邮箱</span>
+    <input class="gf-form-input width-40" disabled type="text" ng-model="ctrl.current.jsonData.clientEmail" />
+  </div>
+  <div class="gf-form">
+    <span class="gf-form-label width-10">Token URI</span>
+    <input class="gf-form-input width-40" disabled type="text" ng-model='ctrl.current.jsonData.tokenUri' />
+  </div>
+  <div class="gf-form" ng-if="ctrl.current.secureJsonFields.privateKey">
+    <span class="gf-form-label width-10">私钥</span>
+    <input type="text" class="gf-form-input max-width-12" disabled="disabled" value="configured">
+  </div>
+
+  <div class="gf-form width-18">
+    <a class="btn btn-secondary gf-form-btn" href="#" ng-click="ctrl.resetValidationMessages()">Reset Service
+      账户key </a>
+    <info-popover mode="right-normal">
+      重置以清除上传密钥并上传一个新文件.
+    </info-popover>
+  </div>
+</div>
+
+<p class="gf-form-label" ng-hide="ctrl.current.secureJsonFields.privateKey || ctrl.current.jsonData.authenticationType !== ctrl.defaultAuthenticationType"><i
+    class="fa fa-save"></i> 上传文件后不要忘记保存你的更改.</p>
+
+<p class="gf-form-label" ng-show="ctrl.current.jsonData.authenticationType !== ctrl.defaultAuthenticationType"><i class="fa fa-save"></i>
+  通过单击Save & Test来验证GCE默认服务帐户</p>

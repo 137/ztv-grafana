@@ -1,0 +1,129 @@
+<aside class="dashboard-settings__aside">
+	<a href="{{::section.url}}" class="dashboard-settings__nav-item" ng-class="{active: ctrl.viewId === section.id}" ng-repeat="section in ctrl.sections">
+    <i class="{{::section.icon}}"></i>
+		{{::section.title}}
+	</a>
+
+	<div class="dashboard-settings__aside-actions">
+    <button class="btn btn-primary" ng-click="ctrl.saveDashboard()" ng-show="ctrl.canSave">
+			保存
+		</button>
+		<button class="btn btn-inverse" ng-click="ctrl.openSaveAsModal()" ng-show="ctrl.canSaveAs">
+			另存为...
+		</button>
+	</div>
+</aside>
+
+<div class="dashboard-settings__content" ng-if="ctrl.viewId === 'settings'">
+	<h3 class="dashboard-settings__header">
+		常规
+	</h3>
+
+	<div class="gf-form-group">
+		<div class="gf-form">
+			<label class="gf-form-label width-7">名称</label>
+			<input type="text" class="gf-form-input width-30" ng-model='ctrl.dashboard.title'></input>
+		</div>
+		<div class="gf-form">
+			<label class="gf-form-label width-7">描述</label>
+			<input type="text" class="gf-form-input width-30" ng-model='ctrl.dashboard.description'></input>
+		</div>
+		<div class="gf-form">
+			<label class="gf-form-label width-7">
+				标记
+				<info-popover mode="right-normal">按回车键添加标记</info-popover>
+			</label>
+			<bootstrap-tagsinput ng-model="ctrl.dashboard.tags" tagclass="label label-tag" placeholder="添加标记">
+			</bootstrap-tagsinput>
+		</div>
+		<folder-picker initial-title="ctrl.dashboard.meta.folderTitle"
+									 initial-folder-id="ctrl.dashboard.meta.folderId"
+									 on-change="ctrl.onFolderChange($folder)"
+									 enable-create-new="true"
+									 is-valid-selection="true"
+									 label-class="width-7"
+									 dashboard-id="ctrl.dashboard.id">
+		</folder-picker>
+		<gf-form-switch class="gf-form" label="可编辑的" tooltip="取消选中，然后保存并重新加载以禁用所有仪表板编辑" checked="ctrl.dashboard.editable" label-class="width-7">
+		</gf-form-switch>
+	</div>
+
+	<gf-time-picker-settings dashboard="ctrl.dashboard"></gf-time-picker-settings>
+
+	<h5 class="section-heading">面板选项</h5>
+	<div class="gf-form">
+		<label class="gf-form-label width-11">
+			图形工具提示
+			<info-popover mode="right-normal">
+				使用快捷方式在选项之间切换: CTRL+O or CMD+O
+			</info-popover>
+		</label>
+		<div class="gf-form-select-wrapper">
+			<select ng-model="ctrl.dashboard.graphTooltip" class='gf-form-input' ng-options="f.value as f.text for f in [{value: 0, text: 'Default'}, {value: 1, text: 'Shared crosshair'},{value: 2, text: 'Shared Tooltip'}]"></select>
+		</div>
+	</div>
+	<div class="gf-form-button-row">
+	  <button class="btn btn-danger" ng-click="ctrl.deleteDashboard()" ng-show="ctrl.canDelete">
+		删除仪表板
+	  </button>
+  </div>
+</div>
+
+<div class="dashboard-settings__content" ng-if="ctrl.viewId === 'annotations'" ng-include="'public/app/features/annotations/partials/editor.html'">
+</div>
+
+<div class="dashboard-settings__content" ng-if="ctrl.viewId === 'templating'"  ng-include="'public/app/features/templating/partials/editor.html'">
+</div>
+
+<div class="dashboard-settings__content" ng-if="ctrl.viewId === 'links'" >
+	<dash-links-editor dashboard="ctrl.dashboard"></dash-links-editor>
+</div>
+
+<div class="dashboard-settings__content" ng-if="ctrl.viewId === 'versions'" >
+	<gf-dashboard-history dashboard="dashboard"></gf-dashboard-history>
+</div>
+
+<div class="dashboard-settings__content" ng-if="ctrl.viewId === 'dashboard_json'" >
+	<h3 class="dashboard-settings__header">JSON 模型</h3>
+  <div class="dashboard-settings__subheader">
+下面的json模型是定义仪表板的数据结构。包括设置、面板设置和布局，查询等。
+  </div>
+
+	<div class="gf-form">
+		<code-editor content="ctrl.json" data-mode="json" data-max-lines=30 ></code-editor>
+	</div>
+
+  <div class="gf-form-button-row">
+    <button class="btn btn-primary" ng-click="ctrl.saveDashboardJson()" ng-show="ctrl.canSave">
+	保存更改
+    </button>
+  </div>
+</div>
+
+<div class="dashboard-settings__content" ng-if="ctrl.viewId === 'permissions'" >
+  <dashboard-permissions ng-if="ctrl.dashboard && !ctrl.hasUnsavedFolderChange"
+    dashboardId="ctrl.dashboard.id"
+    backendSrv="ctrl.backendSrv"
+    folder="ctrl.getFolder()"
+  />
+  <div ng-if="ctrl.hasUnsavedFolderChange">
+    <h5>您已更改文件夹，请保存以查看权限.</h5>
+  </div>
+</div>
+
+<div class="dashboard-settings__content" ng-if="ctrl.viewId === '404'">
+  <h3 class="dashboard-settings__header">找不到设置视图</h3>
+
+  <div>
+    <h5>找不到“设置”页，或者您没有访问该页的权限</h5>
+  </div>
+</div>
+
+<div class="dashboard-settings__content" ng-if="ctrl.viewId === 'make_editable'">
+  <h3 class="dashboard-settings__header">设置为可编辑</h3>
+
+  <button class="btn btn-primary" ng-click="ctrl.makeEditable()">
+	设置为可编辑
+  </button>
+</div>
+
